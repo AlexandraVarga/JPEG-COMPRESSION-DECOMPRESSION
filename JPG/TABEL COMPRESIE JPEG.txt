@@ -1,0 +1,12 @@
+      	compression value
+img0:	69
+img1:	73
+img2:	75
+img3:	99
+img4:	89
+img5:	99
+img6:	96
+img7:	97
+img8:	97
+img9:	99
+

@@ -1,0 +1,40 @@
+JPEG compression:
+- scop: reducerea spatiului de memorie ocupat de imagini, transferul mai eficient
+- cum? elimina proprietati care nu sunt atat de usor perceptibile de catre ochiul uman
+- cu cat scade calitatea, creste rata de compresie => scade dimensiunea spatiului ocupat
+- rezolutia imaginii (ca numar de pixeli) ramane aceeasi
+- elimina informatie care nu este usor perceputa de ochiul uman (celule bastonase nu percep culoarea, percep stralucirea, dar sunt mai multe decat celulele cu conuri 
+=> ochiul uman percepe luminozitatea mai mult decat culoarea)
+- 5 pasi
+	1. Color Space Conversion
+		- fiecare pixel are asociata cate o valoare pentru R, G, B => culoarea
+		- se iau aceste 3 valori si se calculeaza 3 valori noi:
+			Y - luminozitatea
+			Cb - cromatica albastra
+			Cr - cromatica rosie
+		- procesul este reversibil => nu se pierde informatie in acest pas
+	
+	2. Chrominance Downsampling (esantionare)
+		- se iau componentele Cb, Cr si se divid in block-uri
+		- se calculeaza valoarea medie pentru fiecare block de 2/2
+		- se elimina informatia repetitiva si se inlocuiesc valorile din Cb, Cr cu media
+		- informatia greu de perceput de catre ochi se reduce la 1 / 4, dar Y (usor de perceput) ramane neschimbat => diferenta aproape insesizabila
+		- se recalculeaza R, G, B din valorile medii obtinute pentru Cb, Cr => noua imagine
+
+	3. Discrete Cosine Transform (DCT) + 4. Quantization
+		- trec prin prin fiecare sectiune a imaginii si gasesc zone unde exista fluctuatii mari de luminozitate/cromatica (greu de perceput de ochiul uman) si le elimina
+		DAR CUM?
+		- se divide imaginea in block-uri de 8 * 8
+		- avem in fiecare block 64 valori de la 0 la 255 care reprezinta luminozitatea pixelului
+		- scadem 128 din fiecare ca sa obtinem o valoare intre -128 (black) si 127 (white)
+		- DCT - reconstruieste imaginea folosind cele 64 de base image (rezulta astfel un table de constante cu valoare proportionale cu frecventele block-urilor)
+		- se imparte fiecare valoare din tabelul de constante la valoarea din Q (tabel de cuantizare) si se rotunjeste
+		- Q: coltul dreapta jos -> valori mari (impart la valori mari trasaturile greu de perceput ca sa le elimin - detalii) 
+		si stanga sus -> valori mici (vreau sa pastrez informatii perceptibile - e.g. patterns)
+		- obtinem multi de 0 (matricea B)
+		- facem asta si pentru luminozitate si cromatica, pentru fiecare bloc de 8 * 8 in parte
+
+	5. Run Length & Huffman Encoding -- ESTE NEVOIE?
+		- se pun numerele din matricea B obtinuta in ZIG-ZAG deoarece numerele nenule apar la inceput astfel
+		- RLE pentru 0 (in loc sa pastram toate 0, retinem cate 0 consecutive avem la fiecare secventa)
+		- pe sirul obtinut aplicam codificare Huffman
