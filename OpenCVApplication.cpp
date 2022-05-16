@@ -4,7 +4,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
-
 #include <cstdio>
 #include <iostream>
 #include <fstream>
@@ -25,8 +24,7 @@ double luminanceData[8][8] = {
     {18, 22, 37, 56, 68, 109, 103, 77},
     {24, 35, 55, 64, 81, 104, 113, 92},
     {49, 64, 78, 87, 103, 121, 120, 101},
-    {72, 92, 95, 98, 112, 100, 103, 99}
-};
+    {72, 92, 95, 98, 112, 100, 103, 99}};
 // matrix of chrominance data
 double chrominanceData[8][8] = {
     {17, 18, 24, 27, 99, 99, 99, 99},
@@ -36,18 +34,19 @@ double chrominanceData[8][8] = {
     {99, 99, 99, 99, 99, 99, 99, 99},
     {99, 99, 99, 99, 99, 99, 99, 99},
     {99, 99, 99, 99, 99, 99, 99, 99},
-    {99, 99, 99, 99, 99, 99, 99, 99}
-};
+    {99, 99, 99, 99, 99, 99, 99, 99}};
 
-Mat compression(Mat originalImage) {
+Mat compression(Mat originalImage)
+{
 
     // Get the height and width of the original image
     int height = originalImage.size().height;
     int width = originalImage.size().width;
+    f
 
-    // Convert the image to YUV
-    Mat convertedImage;
-    cvtColor(originalImage, convertedImage, COLOR_RGB2YUV);// Y U V
+        // Convert the image to YUV
+        Mat convertedImage;
+    cvtColor(originalImage, convertedImage, COLOR_RGB2YUV); // Y U V
 
     // Transform 2D array of luminance and chrominance to matrix
     Mat luminance = Mat(8, 8, CV_64FC1, &luminanceData);
@@ -64,11 +63,14 @@ Mat compression(Mat originalImage) {
     height = height - height % 8;
     width = width - width % 8;
 
-    for (int i = 0; i < height; i += 8) {
+    for (int i = 0; i < height; i += 8)
+    {
 
-        for (int j = 0; j < width; j += 8) {
+        for (int j = 0; j < width; j += 8)
+        {
 
-            for (int plane = 1; plane < numberOfPlanes; plane++) {
+            for (int plane = 1; plane < numberOfPlanes; plane++)
+            {
 
                 // get a block8x8 of size 8x8
                 Mat block8x8 = planes[plane](Rect(j, i, 8, 8));
@@ -80,13 +82,15 @@ Mat compression(Mat originalImage) {
                 subtract(block8x8, 128.0, block8x8);
 
                 // Apply DCT
-                dct(block8x8, block8x8);//implementare manuala
+                dct(block8x8, block8x8); // implementare manuala
 
                 // Apply quantization - why is different?
-                if (plane == 0) {// for Y channel - correspondent intensity
+                if (plane == 0)
+                { // for Y channel - correspondent intensity
                     divide(block8x8, luminance, block8x8);
                 }
-                else {//color - using U, V channels
+                else
+                { // color - using U, V channels
                     divide(block8x8, chrominance, block8x8);
                 }
                 // Convert it back to unsigned int
@@ -103,9 +107,9 @@ Mat compression(Mat originalImage) {
     return finalImage;
 }
 
-
 // Decompression
-Mat decompression(Mat finalImage) {
+Mat decompression(Mat finalImage)
+{
     // Get the height and width of the original image
     int height = finalImage.size().height;
     int width = finalImage.size().width;
@@ -125,11 +129,14 @@ Mat decompression(Mat finalImage) {
     height = height - height % 8;
     width = width - width % 8;
 
-    for (int i = 0; i < height; i += 8) {
+    for (int i = 0; i < height; i += 8)
+    {
 
-        for (int j = 0; j < width; j += 8) {
+        for (int j = 0; j < width; j += 8)
+        {
 
-            for (int plane = 1; plane < numberOfPlanes; plane++) {
+            for (int plane = 1; plane < numberOfPlanes; plane++)
+            {
 
                 // get a block of size 8x8
                 Mat block8x8 = planes[plane](Rect(j, i, 8, 8));
@@ -138,15 +145,17 @@ Mat decompression(Mat finalImage) {
                 block8x8.convertTo(block8x8, CV_64FC1);
 
                 // Apply dequantization ( multiplying)
-                if (plane == 0) {
+                if (plane == 0)
+                {
                     multiply(block8x8, luminance, block8x8);
                 }
-                else {
+                else
+                {
                     multiply(block8x8, chrominance, block8x8);
                 }
 
                 // Apply IDCT
-                idct(block8x8, block8x8);//manual
+                idct(block8x8, block8x8); // manual
 
                 // Add 128 to the block
                 add(block8x8, 128.0, block8x8);
@@ -167,54 +176,53 @@ Mat decompression(Mat finalImage) {
     return finalImage;
 }
 
+int main()
+{
 
+    char *file_name = "BMP/img-1.bmp";
+    // Read the image
+    Mat image = imread(file_name, IMREAD_COLOR);
 
-int main() {
-    
-        char *file_name = "BMP/img-1.bmp";
-        // Read the image
-        Mat image = imread(file_name, IMREAD_COLOR);
+    // check if the image is valid or not
+    if (image.empty())
+    {
+        cout << "Could not open or find the image" << endl;
+        return -1;
+    }
+    // get the size of the original image
+    ifstream fin(file_name, ios::binary);
+    fin.seekg(0, ios_base::end);
+    streampos originalImageSize = fin.tellg();
+    fin.close();
 
-        // check if the image is valid or not
-        if (image.empty()) {
-            cout << "Could not open or find the image" << endl;
-            return -1;
-        }
-        // get the size of the original image
-        ifstream fin(file_name, ios::binary);
-        fin.seekg(0, ios_base::end);
-        streampos originalImageSize = fin.tellg();
-        fin.close();
+    // compress the image and save it to compressedImage
+    Mat compressedImage = compression(image);
+    imwrite("compressedImage.jpg", compressedImage);
 
-        // compress the image and save it to compressedImage
-        Mat compressedImage = compression(image);
-        imwrite("compressedImage.jpg", compressedImage);
+    // get the size of the compressed image
+    ifstream fin1("compressedImage.jpg", ios::binary);
+    fin1.seekg(0, ios_base::end);
+    streampos CompressedImageSize = fin1.tellg();
+    fin1.close();
 
-        // get the size of the compressed image
-        ifstream fin1("compressedImage.jpg", ios::binary);
-        fin1.seekg(0, ios_base::end);
-        streampos CompressedImageSize = fin1.tellg();
-        fin1.close();
+    // to save the compressed to binary file
+    // FileStorage fs("file.yml", FileStorage::WRITE);
+    // fs << "yourMat" << compressedImage;
 
-        // to save the compressed to binary file
-        //FileStorage fs("file.yml", FileStorage::WRITE);
-        //fs << "yourMat" << compressedImage;
+    // Decompress the image and save it
+    Mat uncompressedImage = decompression(compressedImage);
+    imwrite("DecompressedImage.jpg", uncompressedImage);
 
-        // Decompress the image and save it
-        Mat uncompressedImage = decompression(compressedImage);
-        imwrite("DecompressedImage.jpg", uncompressedImage);
-        
-        //showing the results before and after compression
-        //imshow("Before compression", image);
-        imshow("Decompressed image", uncompressedImage);
-        waitKey(0);
-        
-        // calculate the compression ratio
-        double compressionRatio = (double)CompressedImageSize / (double)originalImageSize;
-        cout << "Compression Ratio: " << compressionRatio << endl;
-        double savedSpace = 1 - compressionRatio;
-        cout <<fixed<<setprecision(2)<< "Saved space:" << savedSpace * 100 << "%" << endl;
+    // showing the results before and after compression
+    // imshow("Before compression", image);
+    imshow("Decompressed image", uncompressedImage);
+    waitKey(0);
 
-    
+    // calculate the compression ratio
+    double compressionRatio = (double)CompressedImageSize / (double)originalImageSize;
+    cout << "Compression Ratio: " << compressionRatio << endl;
+    double savedSpace = 1 - compressionRatio;
+    cout << fixed << setprecision(2) << "Saved space:" << savedSpace * 100 << "%" << endl;
+
     return 0;
 }
