@@ -35,7 +35,7 @@ vector<vector<float>> dct(vector<vector<float>> imgMat)
 
     vector<vector<float>> compressed_image;
 
-    float ci, cj, dct1, sum;
+    float ci, cj, temp_dct, sum;
 
     for (int i = 0; i < height; i++)
     {
@@ -57,10 +57,10 @@ vector<vector<float>> dct(vector<vector<float>> imgMat)
             {
                 for (int l = 0; l < width; l++)
                 {
-                    dct1 = imgMat[k][l] *
-                           cos((2 * k + 1) * i * pi / (2 * height)) *
-                           cos((2 * l + 1) * j * pi / (2 * width));
-                    sum = sum + dct1;
+                    temp_dct = imgMat[k][l] *
+                               cos((2 * k + 1) * i * pi / (2 * height)) *
+                               cos((2 * l + 1) * j * pi / (2 * width));
+                    sum += temp_dct;
                 }
             }
 
