@@ -6,7 +6,7 @@ using namespace std;
 #define vi vector<int>
 #define vmati vector<vector<int>>
 
-vector<int> zigzag(vmati matrix)
+vi zigzag(vmati matrix)
 {
     int length = matrix.size();
     int width = matrix[0].size();
@@ -70,4 +70,47 @@ vector<vector<float>> dct(vector<vector<float>> imgMat)
     }
 
     return compressed_image;
+}
+
+vector<vector<float>> idct(vector<vector<float>> compressed_img)
+{
+    int height = compressed_img.size();
+    int width = compressed_img[0].size();
+
+    vector<vector<float>> decompressed_img;
+
+    float ci, cj, temp_idct, sum;
+
+    for (int i = 0; i < height; i++)
+    {
+        vector<float> temp;
+        for (int j = 0; j < width; j++)
+        {
+
+            sum = 0;
+            for (int k = 0; k < height; k++)
+            {
+                for (int l = 0; l < width; l++)
+                {
+                    if (k == 0)
+                        ci = 1 / sqrt(2);
+                    else
+                        ci = 1;
+                    if (j == 0)
+                        cj = 1 / sqrt(2);
+                    else
+                        cj = 1;
+                    temp_idct = compressed_img[k][l] *
+                                cos((2 * i + 1) * k * pi / (2 * height)) *
+                                cos((2 * j + 1) * l * pi / (2 * width));
+                    sum += temp_idct;
+                }
+            }
+
+            temp.push_back(ci * cj * sum);
+        }
+        decompressed_img.push_back(temp);
+    }
+
+    return decompressed_img;
 }
