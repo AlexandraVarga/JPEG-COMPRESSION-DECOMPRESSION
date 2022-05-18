@@ -100,14 +100,15 @@ vector<vector<float>> idct(vector<vector<float>> compressed_img)
                         cj = 1 / sqrt(2);
                     else
                         cj = 1;
-                    temp_idct = compressed_img[k][l] *
+                    temp_idct = ci * cj * compressed_img[k][l] *
                                 cos((2 * i + 1) * k * pi / (2 * height)) *
                                 cos((2 * j + 1) * l * pi / (2 * width));
                     sum += temp_idct;
                 }
             }
+            sum /= 4;
 
-            temp.push_back(ci * cj * sum);
+            temp.push_back(sum);
         }
         decompressed_img.push_back(temp);
     }
